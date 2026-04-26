@@ -4,21 +4,26 @@
  */
 
 export const BASE_URL = (import.meta.env.VITE_API_URL || 'https://2393-106-219-205-156.ngrok-free.app').replace(/\/api\/?$/, '');
+// ⚠️  IMPORTANT: When ngrok URL changes, update VITE_API_URL in Vercel env vars AND redeploy.
+//    The hardcoded fallback above is only used in local dev. On Vercel, VITE_API_URL must be set.
 
 export const getImageUrl = (url?: string) => {
   if (!url) return "";
-  if (url.startsWith('http')) return url;
+  
+  let fullUrl = url;
+  if (!url.startsWith('http')) {
+    // Ensure we don't have double slashes
+    const cleanBase = BASE_URL.endsWith('/') ? BASE_URL.slice(0, -1) : BASE_URL;
+    const cleanPath = url.startsWith('/') ? url : `/${url}`;
+    fullUrl = `${cleanBase}${cleanPath}`;
+  }
 
-  // Ensure we don't have double slashes
-  const cleanBase = BASE_URL.endsWith('/') ? BASE_URL.slice(0, -1) : BASE_URL;
-  const cleanPath = url.startsWith('/') ? url : `/${url}`;
-
-  const fullUrl = `${cleanBase}${cleanPath}`;
-
-  // Append ngrok skip warning parameter if it's an ngrok URL
+  // Always ensure ngrok skip warning parameter is present if it's an ngrok URL
   if (fullUrl.includes('ngrok-free.app')) {
-    const connector = fullUrl.includes('?') ? '&' : '?';
-    return `${fullUrl}${connector}ngrok-skip-browser-warning=true`;
+    if (!fullUrl.includes('ngrok-skip-browser-warning')) {
+      const connector = fullUrl.includes('?') ? '&' : '?';
+      return `${fullUrl}${connector}ngrok-skip-browser-warning=true`;
+    }
   }
 
   return fullUrl;
