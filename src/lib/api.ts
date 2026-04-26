@@ -3,7 +3,7 @@
  * All calls go to the FastAPI backend at http://localhost:5000.
  */
 
-export const BASE_URL = (import.meta.env.VITE_API_URL || 'https://f597-117-99-98-77.ngrok-free.app').replace(/\/api\/?$/, '');
+export const BASE_URL = (import.meta.env.VITE_API_URL || 'https://2393-106-219-205-156.ngrok-free.app').replace(/\/api\/?$/, '');
 
 export const getImageUrl = (url?: string) => {
   if (!url) return "";

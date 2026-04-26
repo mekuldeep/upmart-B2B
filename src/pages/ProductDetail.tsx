@@ -103,17 +103,31 @@ const ProductDetail = () => {
   }
 
   // Build image list: combine product-level + variant images
+  const allVariantImages = product.variants.flatMap(v => v.images || []);
+  
+  // If a variant is selected, we might want to prioritize its images
   const currentVariantImages = selectedVariant
     ? (product.variants.find(v => v.id === selectedVariant.id)?.images || [])
     : [];
-  const allImages = [
-    ...product.images,
-    ...(selectedVariant ? currentVariantImages : []),
-  ];
-  // If no product images but there are variant images (first variant)
-  const displayImages = allImages.length > 0
-    ? allImages
-    : product.variants[0]?.images || [];
+
+  let displayImages = [];
+  if (selectedVariant && currentVariantImages.length > 0) {
+    // Show selected variant images first, then others
+    const otherImages = [
+      ...product.images,
+      ...allVariantImages.filter(img => !currentVariantImages.some(cv => cv.id === img.id))
+    ];
+    displayImages = [...currentVariantImages, ...otherImages];
+  } else {
+    // Show product images first, then all variant images
+    displayImages = [...product.images, ...allVariantImages];
+  }
+
+  // Final fallback if absolutely nothing found
+  if (displayImages.length === 0 && product.primary_image) {
+    displayImages = [product.primary_image];
+  }
+
   const activeImage = displayImages[activeImageIdx] || null;
 
   const handleAddToCart = () => {
